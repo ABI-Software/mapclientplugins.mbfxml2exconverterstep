@@ -15,10 +15,15 @@ def readfile(filename, split=False):
             return stream.read().split("\n")
         return stream.read()
 
+
 readme = readfile("README.rst", split=True)[3:]  # skip title
-# For requirements not hosted on PyPi place listings
-# into the 'requirements.txt' file.
-requires = []  # minimal requirements listing
+
+requires = [
+    # minimal requirements listing
+    'mbfxml2ex',
+    'PySide2',
+]
+
 source_license = readfile("LICENSE")
 
 
@@ -31,22 +36,24 @@ class InstallCommand(install):
         subprocess.call(['pip', 'install', '-r', os.path.join(SETUP_DIR, 'requirements.txt')])
 
 
-setup(name='mapclientplugins.mbfxml2exconverterstep',
+setup(
+    name='mapclientplugins.mbfxml2exconverterstep',
     version='0.1.0',
     description='',
     long_description='\n'.join(readme) + source_license,
+    long_description_content_type='text/x-rst',
     classifiers=[
       "Development Status :: 3 - Alpha",
       "License :: OSI Approved :: Apache Software License",
       "Programming Language :: Python",
     ],
-    cmdclass={'install': InstallCommand,},
+    cmdclass={'install': InstallCommand, },
     author='Hugh Sorby',
     author_email='',
     url='',
-    packages=find_packages(exclude=['ez_setup',]),
+    packages=find_packages(exclude=['ez_setup', ]),
     namespace_packages=['mapclientplugins'],
     include_package_data=True,
     zip_safe=False,
     install_requires=requires,
-    )
+)

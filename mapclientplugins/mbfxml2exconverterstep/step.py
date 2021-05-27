@@ -2,9 +2,13 @@
 """
 MAP Client Plugin Step
 """
+import os
 import json
 
 from PySide2 import QtGui
+
+from mbfxml2ex.zinc import write_ex
+from mbfxml2ex.app import read_xml
 
 from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
 from mapclientplugins.mbfxml2exconverterstep.configuredialog import ConfigureDialog
@@ -21,20 +25,19 @@ class mbfxml2exconverterStep(WorkflowStepMountPoint):
         self._configured = False # A step cannot be executed until it has been configured.
         self._category = 'Utility'
         # Add any other initialisation code here:
-        self._icon =  QtGui.QImage(':/mbfxml2exconverterstep/images/utility.png')
+        self._icon = QtGui.QImage(':/mbfxml2exconverterstep/images/utility.png')
         # Ports:
         self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port',
                       'http://physiomeproject.org/workflow/1.0/rdf-schema#uses',
-                      'file_location'))
+                      'http://physiomeproject.org/workflow/1.0/rdf-schema#file_location'))
         self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port',
                       'http://physiomeproject.org/workflow/1.0/rdf-schema#provides',
-                      'file_location'))
+                      'http://physiomeproject.org/workflow/1.0/rdf-schema#file_location'))
         # Port data:
-        self._portData0 = None # file_location
-        self._portData1 = None # file_location
+        self._portData0 = None  # file_location
+        self._portData1 = None  # file_location
         # Config:
-        self._config = {}
-        self._config['identifier'] = ''
+        self._config = {'identifier': ''}
 
     def execute(self):
         """
@@ -42,7 +45,17 @@ class mbfxml2exconverterStep(WorkflowStepMountPoint):
         Make sure you call the _doneExecution() method when finished.  This method
         may be connected up to a button in a widget for example.
         """
-        # Put your execute step code here before calling the '_doneExecution' method.
+        output_dir = os.path.join(self._location, f"output_{self._config['identifier']}")
+        if not os.path.isdir(output_dir):
+            os.mkdir(output_dir)
+
+        contents = read_xml(self._portData0)
+
+        if contents is None:
+            raise IOError(f"Could not read MBF XML '{self._portData0}'.")
+        else:
+            self._portData1 = os.path.join(output_dir, f"{os.path.basename(self._portData0)}.ex")
+            write_ex(self._portData1, contents)
         self._doneExecution()
 
     def setPortData(self, index, dataIn):
@@ -54,7 +67,7 @@ class mbfxml2exconverterStep(WorkflowStepMountPoint):
         :param index: Index of the port to return.
         :param dataIn: The data to set for the port at the given index.
         """
-        self._portData0 = dataIn # file_location
+        self._portData0 = dataIn  # file_location
 
     def getPortData(self, index):
         """
@@ -64,7 +77,7 @@ class mbfxml2exconverterStep(WorkflowStepMountPoint):
 
         :param index: Index of the port to return.
         """
-        return self._portData1 # file_location
+        return self._portData1  # file_location
 
     def configure(self):
         """
@@ -118,5 +131,3 @@ class mbfxml2exconverterStep(WorkflowStepMountPoint):
         d.identifierOccursCount = self._identifierOccursCount
         d.setConfig(self._config)
         self._configured = d.validate()
-
-
