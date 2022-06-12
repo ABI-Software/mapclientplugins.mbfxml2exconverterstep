@@ -23,4 +23,15 @@ This step uses a *http://physiomeproject.org/workflow/1.0/rdf-schema#file_locati
 
    *MBF XML 2 Ex Converter* step configuration dialog.
 
+Ports
+-----
 
+This plugin:
+
+* **uses**:
+
+  * *http://physiomeproject.org/workflow/1.0/rdf-schema#file_location*
+
+* **provides**:
+
+  * *http://physiomeproject.org/workflow/1.0/rdf-schema#file_location*
