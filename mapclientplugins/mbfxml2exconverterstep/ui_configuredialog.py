@@ -53,7 +53,7 @@ class Ui_ConfigureDialog(object):
     # setupUi
 
     def retranslateUi(self, ConfigureDialog):
-        ConfigureDialog.setWindowTitle(QCoreApplication.translate("ConfigureDialog", u"Configure Step", None))
+        ConfigureDialog.setWindowTitle(QCoreApplication.translate("ConfigureDialog", u"Configure MBF XML 2 EX Converter", None))
         self.configGroupBox.setTitle("")
         self.label0.setText(QCoreApplication.translate("ConfigureDialog", u"identifier:  ", None))
     # retranslateUi
