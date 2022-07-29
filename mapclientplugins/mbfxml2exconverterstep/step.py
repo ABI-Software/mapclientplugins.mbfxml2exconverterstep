@@ -5,7 +5,7 @@ MAP Client Plugin Step
 import os
 import json
 
-from PySide2 import QtGui
+from PySide2 import QtGui, QtWidgets, QtCore
 
 from mbfxml2ex.zinc import write_ex
 from mbfxml2ex.app import read_xml
@@ -45,6 +45,7 @@ class mbfxml2exconverterStep(WorkflowStepMountPoint):
         Make sure you call the _doneExecution() method when finished.  This method
         may be connected up to a button in a widget for example.
         """
+        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
         output_dir = os.path.join(self._location, f"output_{self._config['identifier']}")
         if not os.path.isdir(output_dir):
             os.mkdir(output_dir)
@@ -57,6 +58,7 @@ class mbfxml2exconverterStep(WorkflowStepMountPoint):
             self._portData1 = os.path.join(output_dir, f"{os.path.basename(self._portData0)}.ex")
             write_ex(self._portData1, contents)
         self._doneExecution()
+        QtWidgets.QApplication.restoreOverrideCursor()
 
     def setPortData(self, index, dataIn):
         """
