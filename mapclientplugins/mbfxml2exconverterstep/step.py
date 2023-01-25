@@ -5,7 +5,7 @@ MAP Client Plugin Step
 import os
 import json
 
-from PySide2 import QtGui, QtWidgets, QtCore
+from PySide6 import QtGui, QtWidgets, QtCore
 
 from mbfxml2ex.zinc import write_ex
 from mbfxml2ex.app import read_xml
