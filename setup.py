@@ -37,7 +37,7 @@ readme = readfile("README.rst", split=True)[3:]  # skip title
 requires = [
     # minimal requirements listing
     'mbfxml2ex >= 0.4.4',
-    'PySide2',
+    'PySide6',
 ]
 
 source_license = readfile("LICENSE")
