@@ -1,37 +1,23 @@
-MAP Client Plugin - MBF XML 2 Ex Converter
-==========================================
+MBF XML 2 Ex Converter
+======================
+
+Overview
+--------
 
 The **MBF XML 2 Ex Converter** is MAP Client plugin for converting MBF Bioscience XML files to Ex format.
 
-.. _fig-mcp-mbf-xml-2-ex-converter-un-configured-step:
+Specification
+-------------
 
-.. figure:: _images/configured-step.png
-   :alt: Configured step icon
+Information on this plugins' specificaiton is available :ref:`here <mcp-mbfxml2exconverter-specification>`.
 
-   A configured *MBF XML 2 Ex Converter* step icon.
+Configuration
+-------------
 
-Configure
----------
+Information on this plugins' configuration is available :ref:`here <mcp-mbfxml2exconverter-configuration>`.
 
-This step is used for converting MBF Bioscience XML files to Ex.
-This step uses a *http://physiomeproject.org/workflow/1.0/rdf-schema#file_location* which gives the MBF Bioscience XML file to convert and provides a *http://physiomeproject.org/workflow/1.0/rdf-schema#file_location* which is the converted data in Ex format.
+Instructions
+------------
 
-.. _fig-mcp-mbf-xml-2-ex-converter-configure-dialog:
-
-.. figure:: _images/step-configuration-dialog.png
-   :alt: Step configure dialog
-
-   *MBF XML 2 Ex Converter* step configuration dialog.
-
-Ports
------
-
-This plugin:
-
-* **uses**:
-
-  * *http://physiomeproject.org/workflow/1.0/rdf-schema#file_location*
-
-* **provides**:
-
-  * *http://physiomeproject.org/workflow/1.0/rdf-schema#file_location*
+This is a non-interactive step.
+See `Configuration`_.
