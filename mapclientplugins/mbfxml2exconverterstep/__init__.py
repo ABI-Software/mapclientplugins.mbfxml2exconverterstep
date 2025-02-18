@@ -6,7 +6,7 @@ MAP Client Plugin
 __version__ = '0.2.1'
 __author__ = 'Hugh Sorby'
 __stepname__ = 'mbfxml2exconverter'
-__location__ = 'https://github.com/ABI-Software/mapclientplugins.mbfxml2exconverterstep.git'
+__location__ = 'https://github.com/ABI-Software/mapclientplugins.mbfxml2exconverterstep'
 
 # import class that derives itself from the step mountpoint.
 from mapclientplugins.mbfxml2exconverterstep import step
