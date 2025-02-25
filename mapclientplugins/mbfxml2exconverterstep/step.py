@@ -2,63 +2,102 @@
 """
 MAP Client Plugin Step
 """
+import logging
 import os
 import json
 
+from concurrent.futures import ProcessPoolExecutor
+from functools import partial
+
 from PySide6 import QtGui, QtWidgets, QtCore
 
-from mbfxml2ex.zinc import write_ex
+import mbfxml2ex.exceptions
+
 from mbfxml2ex.app import read_xml
+from mbfxml2ex.zinc import write_ex
 
 from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
 from mapclientplugins.mbfxml2exconverterstep.configuredialog import ConfigureDialog
 
+logger = logging.getLogger(__name__)
 
-class mbfxml2exconverterStep(WorkflowStepMountPoint):
-    """
-    Skeleton step which is intended to be a helpful starting point
-    for new steps.
-    """
+
+def _convert_file(file_path, output_dir):
+    try:
+        contents = read_xml(file_path)
+    except (mbfxml2ex.exceptions.MBFXMLFormat, mbfxml2ex.exceptions.MBFXMLException):
+        contents = None
+
+    if contents is None:
+        file_path_converted = f"Could not read MBF XML '{file_path}'."
+        logger.warning(file_path_converted)
+    else:
+        split_file_name = os.path.splitext(os.path.basename(file_path))
+        file_path_converted = os.path.join(output_dir, f"{split_file_name[0]}.exf")
+        write_ex(file_path_converted, contents)
+
+    return file_path_converted
+
+
+def _process_files_in_parallel(file_list, output_dir):
+    convert_with_output = partial(_convert_file, output_dir=output_dir)
+    with ProcessPoolExecutor() as executor:
+        # Map each file to the conversion function
+        results = list(executor.map(convert_with_output, file_list))
+
+    return results
+
+
+class MBFXML2ExConverterStep(WorkflowStepMountPoint):
 
     def __init__(self, location):
-        super(mbfxml2exconverterStep, self).__init__('mbfxml2exconverter', location)
+        super(MBFXML2ExConverterStep, self).__init__('MBFXML2ExConverter', location)
         self._configured = False # A step cannot be executed until it has been configured.
         self._category = 'Utility'
         # Add any other initialisation code here:
         self._icon = QtGui.QImage(':/mbfxml2exconverterstep/images/utility.png')
         # Ports:
-        self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port',
-                      'http://physiomeproject.org/workflow/1.0/rdf-schema#uses',
-                      'http://physiomeproject.org/workflow/1.0/rdf-schema#file_location'))
-        self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port',
-                      'http://physiomeproject.org/workflow/1.0/rdf-schema#provides',
-                      'http://physiomeproject.org/workflow/1.0/rdf-schema#file_location'))
+        self.addPort([('http://physiomeproject.org/workflow/1.0/rdf-schema#port',
+                       'http://physiomeproject.org/workflow/1.0/rdf-schema#uses',
+                       'http://physiomeproject.org/workflow/1.0/rdf-schema#file_location'),
+                      ('http://physiomeproject.org/workflow/1.0/rdf-schema#port',
+                       'http://physiomeproject.org/workflow/1.0/rdf-schema#uses-list-of',
+                       'http://physiomeproject.org/workflow/1.0/rdf-schema#file_location')
+                      ])
+        self.addPort([('http://physiomeproject.org/workflow/1.0/rdf-schema#port',
+                       'http://physiomeproject.org/workflow/1.0/rdf-schema#provides',
+                       'http://physiomeproject.org/workflow/1.0/rdf-schema#file_location'),
+                      ('http://physiomeproject.org/workflow/1.0/rdf-schema#port',
+                       'http://physiomeproject.org/workflow/1.0/rdf-schema#provides-list-of',
+                       'http://physiomeproject.org/workflow/1.0/rdf-schema#file_location')
+                      ])
         # Port data:
         self._portData0 = None  # file_location
         self._portData1 = None  # file_location
         # Config:
         self._config = {'identifier': ''}
+        self._list_input = True
 
     def execute(self):
-        """
-        Add your code here that will kick off the execution of the step.
-        Make sure you call the _doneExecution() method when finished.  This method
-        may be connected up to a button in a widget for example.
-        """
-        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CursorShape.WaitCursor)
         output_dir = os.path.join(self._location, f"output_{self._config['identifier']}")
         if not os.path.isdir(output_dir):
             os.mkdir(output_dir)
 
-        contents = read_xml(self._portData0)
+        self._list_input = isinstance(self._portData0, list)
+        if not self._list_input:
+            self._portData0 = [self._portData0]
 
-        if contents is None:
-            raise IOError(f"Could not read MBF XML '{self._portData0}'.")
-        else:
-            self._portData1 = os.path.join(output_dir, f"{os.path.basename(self._portData0)}.ex")
-            write_ex(self._portData1, contents)
+        self._process_conversion(output_dir)
+
         self._doneExecution()
         QtWidgets.QApplication.restoreOverrideCursor()
+
+    def _process_conversion(self, output_dir):
+        results = _process_files_in_parallel(self._portData0, output_dir)
+        converted_results = [r for r in results if not r.startswith("Could not read MBF XML")]
+
+        self._portData1 = converted_results if self._list_input else converted_results[0] if len(converted_results) else None
 
     def setPortData(self, index, dataIn):
         """
