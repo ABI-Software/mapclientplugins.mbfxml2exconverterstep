@@ -3,7 +3,7 @@
 MAP Client Plugin
 """
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 __author__ = 'Hugh Sorby'
 __stepname__ = 'mbfxml2exconverter'
 __location__ = 'https://github.com/ABI-Software/mapclientplugins.mbfxml2exconverterstep'
