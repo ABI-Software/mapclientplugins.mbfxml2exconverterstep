@@ -1,3 +1,2 @@
 mbfxml2ex
 PySide6
-mapclient
